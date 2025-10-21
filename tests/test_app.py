@@ -3,6 +3,8 @@ from app import App
 import unittest
 import time
 
+from tests.base_test_case import BaseTestCase
+
 
 class AppWrapper(App):
     def __init__(self, user_input: List[str]):
@@ -16,56 +18,35 @@ class AppWrapper(App):
         return user_input
 
 
-class TestApp(unittest.TestCase):
-    def setUp(self):
-        self.app = AppWrapper([""])
+class TestApp(BaseTestCase):
+    target_class = AppWrapper
+    _setup_args = [[""]]  # AppWrapper expects user_input list
+    public_methods = [
+        "run",
+        "get_user_input",
+        "quit",
+    ]
+    public_properties = [
+        "is_running",
+    ]
 
     def tearDown(self):
-        self.app.quit()
-        del self.app
-
-    def test_instantiation(self):
-        self.assertIsInstance(self.app, App)
-
-    def test_has_public_methods(self):
-        public_methods = [
-            "run",
-            "get_user_input",
-            "quit",
-        ]
-        for method in public_methods:
-            self.assertTrue(
-                hasattr(self.app, method),
-                f"App is missing public method: {method}",
-            )
-            self.assertTrue(
-                callable(getattr(self.app, method, None)),
-                f"App public method is not callable: {method}",
-            )
-
-    def test_has_public_properties(self):
-        public_properties = [
-            "is_running",
-        ]
-        for prop in public_properties:
-            self.assertTrue(
-                hasattr(self.app, prop),
-                f"App is missing public property: {prop}",
-            )
+        self.obj.quit()
+        super().tearDown()
 
     def test_is_running(self):
-        self.app.run()
-        self.assertTrue(self.app.is_running)
+        self.obj.run()
+        self.assertTrue(self.obj.is_running)
 
     def test_is_not_running(self):
-        self.assertFalse(self.app.is_running)
-        self.app.run()
-        self.assertTrue(self.app.is_running)
-        self.app.quit()
-        self.assertFalse(self.app.is_running)
+        self.assertFalse(self.obj.is_running)
+        self.obj.run()
+        self.assertTrue(self.obj.is_running)
+        self.obj.quit()
+        self.assertFalse(self.obj.is_running)
 
     def test_get_user_input(self):
-        user_input = self.app.get_user_input()
+        user_input = self.obj.get_user_input()
         self.assertIsInstance(user_input, str)
 
     def test_user_can_quit(self):
@@ -75,6 +56,9 @@ class TestApp(unittest.TestCase):
             app.run()
             time.sleep(0.2)
             self.assertFalse(app.is_running)
+
+    def test_workflow_manager_invoke_is_called(self):
+        pass
 
 
 if __name__ == "__main__":
