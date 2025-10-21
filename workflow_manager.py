@@ -72,6 +72,20 @@ class WorkflowManager:
         input_messages = [HumanMessage(user_input)]
         return self.compiled_workflow.invoke({"messages": input_messages}, self.config)
 
+    def stream(self, user_input: str):
+        input_messages = [HumanMessage(user_input)]
+        trimmed_messages = self.trimmer.invoke(input_messages)
+        prompt = self.prompt_template.invoke(
+            {"messages": trimmed_messages, "name": self._agent.name}
+        )
+        for chunk in self._agent.stream(prompt):
+            yield chunk
+
+        full_response = self.compiled_workflow.invoke(
+            {"messages": input_messages}, self.config
+        )
+        return full_response
+
     def _define_nodes(self):
         self.workflow.add_node("model", self._call_model)
         self.workflow.add_edge(START, "model")

@@ -1,4 +1,5 @@
 import os
+import sys
 import threading
 from typing import Optional, Dict
 from workflow_manager import WorkflowManager
@@ -57,26 +58,18 @@ class App:
         if self._run_thread and self._run_thread.is_alive():
             self._run_thread.join(timeout=timeout)
 
-    def _handle_request(self, user_input: str) -> Optional[Dict]:
+    def _handle_request(self, user_input: str):
         if user_input.lower() in {"exit", "quit"}:
             self.quit()
-            return None
-        return self.workflow_manager.invoke(user_input)
-
-    def _handle_response(self, response: Optional[Dict]) -> Optional[str]:
-        if response is None:
-            return None
-        messages = response["messages"]
-        message = messages[-1]
-        return message.content
-
-    def _display_response(self, content: str):
-        print(f"{self.agent_name}: {content}")
+            return
+        print(f"{self.agent_name}: ", end="", flush=True)
+        for chunk in self.workflow_manager.stream(user_input):
+            if hasattr(chunk, "content"):
+                sys.stdout.write(chunk.content)
+                sys.stdout.flush()
+        print()
 
     def _run_app(self):
         while self.is_running:
             user_input = self.get_user_input()
-            response = self._handle_request(user_input)
-            content = self._handle_response(response)
-            if content is not None:
-                self._display_response(content)
+            self._handle_request(user_input)

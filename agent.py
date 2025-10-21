@@ -37,3 +37,6 @@ class Agent:
 
     def invoke(self, prompt: PromptValue) -> AIMessage:
         return self.model.invoke(prompt)
+
+    def stream(self, prompt: PromptValue):
+        return self.model.stream(prompt)

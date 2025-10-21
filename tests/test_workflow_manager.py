@@ -8,7 +8,10 @@ from workflow_manager import WorkflowManager
 
 
 class TestWorkflowManager(BaseTestCase):
-    public_methods = ["invoke"]
+    public_methods = [
+        "invoke",
+        "stream",
+    ]
     public_properties = [
         "workflow",
         "memory",

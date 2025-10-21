@@ -7,7 +7,10 @@ from langchain_core.prompt_values import ChatPromptValue, PromptValue
 
 
 class TestAgent(BaseTestCase):
-    public_methods = ["invoke"]
+    public_methods = [
+        "invoke",
+        "stream",
+    ]
     public_properties = ["model", "system_prompt", "name"]
 
     def __init__(self, *args, **kwargs):

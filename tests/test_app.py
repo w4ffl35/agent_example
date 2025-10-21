@@ -27,7 +27,7 @@ class TestApp(BaseTestCase):
     public_methods = [
         "run",
         "get_user_input",
-        "quit",
+        "quit"
     ]
     public_properties = [
         "is_running",
