@@ -1,11 +1,11 @@
 import os
 import sys
 import threading
-from typing import List, Optional
+from typing import List, Optional, Callable
 from langchain.agents import create_agent
 from langchain_ollama import ChatOllama
+from tool_manager import ToolManager
 from workflow_manager import WorkflowManager
-from agent import Agent
 
 
 class App:
@@ -20,14 +20,32 @@ class App:
         system_prompt_path: str = "docs/system_prompt.md",
         agent_name: str = "Bot",
         tools: Optional[List[callable]] = None,
+        provider_name: str = "ollama",
         model_name: str = "llama3.2",
+        rag_directory: str = "docs/rag",
     ):
+        self.tool_manager = ToolManager(
+            rag_directory=rag_directory,
+            provider_name=provider_name,
+            model_name=model_name,
+        )
+        self._tools = tools
         self._default_system_prompt = "You are a helpful assistant."
         self.system_prompt_path = system_prompt_path
         self.agent_name = agent_name
         self._run_thread = threading.Thread(target=self._run_app)
+        self._provider_name = provider_name
         self._model_name = model_name
-            self._tools = tools
+        self.rag_directory = rag_directory
+
+    @property
+    def tools(self) -> List[Callable]:
+        """
+        Defaults to RAG tool
+        """
+        return (
+            self._tools if self._tools else [self.tool_manager.retrieve_context_tool()]
+        )
 
     @property
     def model(self):
@@ -47,7 +65,7 @@ class App:
         if self._agent is None:
             self._agent = create_agent(
                 model=self.model,
-                tools=self._tools,
+                tools=self.tools,
                 system_prompt=self.system_prompt,
                 name=self.agent_name,
             )

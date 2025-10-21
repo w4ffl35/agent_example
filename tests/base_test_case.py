@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 import unittest
 
 
@@ -6,8 +6,8 @@ class BaseTestCase(unittest.TestCase):
     target_class = None
     public_methods: List[str] = []
     public_properties: List[str] = []
-    _setup_args = [[""]]
-    _setup_kwargs = {}
+    _setup_args: List = [[""]]
+    _setup_kwargs: Dict = {}
 
     def setUp(self):
         if self.target_class is None:
