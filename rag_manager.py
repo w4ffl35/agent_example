@@ -22,6 +22,7 @@ class RAGManager:
         chunk_size: int = 1000,
         chunk_overlap: int = 200,
         vector_store_class: Type[VectorStore] = InMemoryVectorStore,
+        extra_files: Optional[List[str]] = None
     ):
         """
         :param provider_name: The name of the embedding provider.
@@ -37,6 +38,7 @@ class RAGManager:
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         self.vector_store_class_ = vector_store_class
+        self.extra_files = extra_files or []
 
     @property
     def embeddings(self) -> Embeddings:
@@ -73,16 +75,9 @@ class RAGManager:
     @property
     def documents(self) -> List[Document]:
         if self._documents is None:
-            self._documents = (
-                [
-                    Document(
-                        page_content=md_file.read_text(encoding="utf-8"),
-                        metadata={"source": str(md_file)},
-                    )
-                    for md_file in self.rag_path.glob("**/*.md")
-                ]
-                if self.rag_path.exists()
-                else []
+            self._documents = self._load_markdown_documents()
+            self._documents.extend(
+                self._load_extra_files()
             )
         return self._documents
 
@@ -105,6 +100,32 @@ class RAGManager:
         if self._document_ids is None:
             self._document_ids = self.vector_store.add_documents(self.split_documents)
         return self._document_ids
+
+    def _load_markdown_documents(self) -> List[Document]:
+        return (
+            [
+                Document(
+                    page_content=md_file.read_text(encoding="utf-8"),
+                    metadata={"source": str(md_file)},
+                )
+                for md_file in self.rag_path.glob("**/*.md")
+            ]
+            if self.rag_path.exists()
+            else []
+        )
+
+    def _load_extra_files(self) -> List[Document]:
+        documents = []
+        for file_path in self.extra_files:
+            path = Path(file_path)
+            if path.exists() and path.is_file():
+                documents.append(
+                    Document(
+                        page_content=path.read_text(encoding="utf-8"),
+                        metadata={"source": str(path)},
+                    )
+                )
+        return documents
 
     def search(self, query: str, k: int = 2) -> List[Document]:
         """

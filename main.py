@@ -5,10 +5,10 @@ from app import App
 def main():
     parser = argparse.ArgumentParser(description="Run the Agent Example App")
     parser.add_argument(
-        "--system_prompt_path",
+        "--agent_folder",
         type=str,
-        default="docs/system_prompt.md",
-        help="Path to the system prompt file",
+        default="dev_onboarding",
+        help="Name of the agent folder (contains system_prompt.md and knowledge/)",
     )
     parser.add_argument(
         "--agent_name",
@@ -17,10 +17,10 @@ def main():
         help="Name of the agent",
     )
     parser.add_argument(
-        "--rag_directory",
+        "--base_path",
         type=str,
         default="docs/rag",
-        help="Path to the RAG documents directory",
+        help="Base path containing agent folders",
     )
     parser.add_argument(
         "--provider_name",
@@ -34,13 +34,20 @@ def main():
         default="llama3.2",
         help="Name of the language model to use",
     )
+    parser.add_argument(
+        "--extra_files",
+        type=str,
+        default="",
+        help="Comma-separated list of extra files to include in the knowledge base",
+    )
     args = vars(parser.parse_args())
     app = App(
-        system_prompt_path=args["system_prompt_path"],
+        agent_folder=args["agent_folder"],
         agent_name=args["agent_name"],
         provider_name=args["provider_name"],
         model_name=args["model_name"],
-        rag_directory=args["rag_directory"],
+        base_path=args["base_path"],
+        extra_files=args["extra_files"].split(",") if args["extra_files"] else [],
     )
     app.run()
     app.join()

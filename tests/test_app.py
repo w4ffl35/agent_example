@@ -29,12 +29,17 @@ class TestApp(BaseTestCase):
     public_methods = ["run", "get_user_input", "quit"]
     public_properties = [
         "is_running",
-        "workflow_manager",
+        "config",
         "agent",
         "agent_name",
+        "agent_folder",
+        "base_path",
+        "agent_path",
         "system_prompt_path",
+        "knowledge_directory",
         "system_prompt",
         "model",
+        "extra_files",
     ]
 
     def tearDown(self):
@@ -53,24 +58,25 @@ class TestApp(BaseTestCase):
         super().tearDown()
 
     def test_is_running(self):
-        # Mock workflow to prevent real execution and suppress output
-        mock_response = {"messages": [HumanMessage(content="test")]}
+        # Mock agent stream to prevent real execution and suppress output
+        def mock_stream(*args, **kwargs):
+            yield (AIMessage(content="test"), {})
+
         with patch("sys.stdout", new_callable=StringIO):  # Suppress print output
-            with patch.object(
-                self.obj.workflow_manager, "invoke", return_value=mock_response
-            ):
+            with patch.object(self.obj.agent, "stream", side_effect=mock_stream):
                 self.obj.run()
                 time.sleep(0.1)  # Give thread time to start
                 self.assertTrue(self.obj.is_running)
 
     def test_is_not_running(self):
         self.assertFalse(self.obj.is_running)
-        # Mock workflow to prevent real execution and suppress output
-        mock_response = {"messages": [HumanMessage(content="test")]}
+
+        # Mock agent stream to prevent real execution and suppress output
+        def mock_stream(*args, **kwargs):
+            yield (AIMessage(content="test"), {})
+
         with patch("sys.stdout", new_callable=StringIO):  # Suppress print output
-            with patch.object(
-                self.obj.workflow_manager, "invoke", return_value=mock_response
-            ):
+            with patch.object(self.obj.agent, "stream", side_effect=mock_stream):
                 self.obj.run()
                 time.sleep(0.1)  # Give thread time to start
                 self.assertTrue(self.obj.is_running)
@@ -86,12 +92,13 @@ class TestApp(BaseTestCase):
         quit_commands = ["quit", "exit"]
         for command in quit_commands:
             app = AppWrapper(user_input=[command])
-            # Mock workflow to prevent real execution and suppress output
-            mock_response = {"messages": [HumanMessage(content="test")]}
+
+            # Mock agent stream to prevent real execution and suppress output
+            def mock_stream(*args, **kwargs):
+                yield (AIMessage(content="test"), {})
+
             with patch("sys.stdout", new_callable=StringIO):  # Suppress print output
-                with patch.object(
-                    app.workflow_manager, "invoke", return_value=mock_response
-                ):
+                with patch.object(app.agent, "stream", side_effect=mock_stream):
                     app.run()
                     time.sleep(0.2)
                     # Ensure thread finishes
@@ -101,16 +108,14 @@ class TestApp(BaseTestCase):
 
     def test_response(self):
         """Test that bot responses are printed in 'Bot: message' format."""
-        mock_workflow_response = {
-            "messages": [HumanMessage(content="Hello"), AIMessage(content="Hi there!")]
-        }
-
         app = AppWrapper(user_input=["Hello", "quit"])
+
+        def mock_stream(*args, **kwargs):
+            yield (AIMessage(content="Hi there!"), {})
+
         with patch("sys.stdout", new_callable=StringIO) as mock_stdout:
-            # Mock the workflow_manager.invoke to avoid real LangGraph execution
-            with patch.object(
-                app.workflow_manager, "invoke", return_value=mock_workflow_response
-            ):
+            # Mock the agent.stream to avoid real LangGraph execution
+            with patch.object(app.agent, "stream", side_effect=mock_stream):
                 app.run()
                 time.sleep(0.2)  # Give thread time to process
                 # Ensure thread finishes BEFORE StringIO context exits
