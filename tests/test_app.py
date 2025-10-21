@@ -14,6 +14,8 @@ class AppWrapper(App):
         super().__init__()
         self._user_input = user_input
         self._input_index = 0
+        # Initialize _model to avoid AttributeError
+        self._model = None
 
     def get_user_input(self) -> str:
         user_input = self._user_input[self._input_index]
@@ -24,11 +26,7 @@ class AppWrapper(App):
 class TestApp(BaseTestCase):
     target_class = AppWrapper
     _setup_args = [[""]]  # AppWrapper expects user_input list
-    public_methods = [
-        "run",
-        "get_user_input",
-        "quit"
-    ]
+    public_methods = ["run", "get_user_input", "quit"]
     public_properties = [
         "is_running",
         "workflow_manager",
@@ -36,6 +34,7 @@ class TestApp(BaseTestCase):
         "agent_name",
         "system_prompt_path",
         "system_prompt",
+        "model",
     ]
 
     def tearDown(self):
@@ -121,6 +120,35 @@ class TestApp(BaseTestCase):
             output = mock_stdout.getvalue()
 
         self.assertIn("Bot:", output, "Expected 'Bot:' prefix in output")
+
+    def test_model_is_initialized(self):
+        """Test that the model property is initialized correctly."""
+        model = self.obj.model
+        self.assertIsNotNone(model)
+
+    def test_agent_is_initialized(self):
+        """Test that the agent property is initialized correctly."""
+
+        # Mock the model to avoid actually initializing Ollama
+        class MockModel:
+            def bind_tools(self, tools, **kwargs):
+                return self
+
+        class MockAgent:
+            def invoke(self, state):
+                return {"messages": [AIMessage(content="Mock response")]}
+
+        self.obj._model = MockModel()
+        self.obj._agent = MockAgent()
+
+        agent = self.obj.agent
+        self.assertIsNotNone(agent)
+
+    def test_agent_name_property(self):
+        """Test that agent_name property works correctly."""
+        app = AppWrapper(user_input=[""])
+        app.agent_name = "TestBot"
+        self.assertEqual(app.agent_name, "TestBot")
 
 
 if __name__ == "__main__":

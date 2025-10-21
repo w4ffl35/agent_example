@@ -1,7 +1,9 @@
 import os
 import sys
 import threading
-from typing import Optional, Dict
+from typing import List, Optional
+from langchain.agents import create_agent
+from langchain_ollama import ChatOllama
 from workflow_manager import WorkflowManager
 from agent import Agent
 
@@ -10,15 +12,28 @@ class App:
     _is_running: bool = False
     _run_thread: threading.Thread = None
     _workflow_manager: Optional[WorkflowManager] = None
-    _agent: Optional[Agent] = None
+    _agent = None
+    _model = None
 
     def __init__(
-        self, system_prompt_path: str = "docs/system_prompt.md", agent_name: str = "Bot"
+        self,
+        system_prompt_path: str = "docs/system_prompt.md",
+        agent_name: str = "Bot",
+        tools: Optional[List[callable]] = None,
+        model_name: str = "llama3.2",
     ):
         self._default_system_prompt = "You are a helpful assistant."
         self.system_prompt_path = system_prompt_path
         self.agent_name = agent_name
         self._run_thread = threading.Thread(target=self._run_app)
+        self._model_name = model_name
+            self._tools = tools
+
+    @property
+    def model(self):
+        if self._model is None:
+            self._model = ChatOllama(model=self._model_name, temperature=0)
+        return self._model
 
     @property
     def system_prompt(self) -> str:
@@ -28,9 +43,14 @@ class App:
             return f.read()
 
     @property
-    def agent(self) -> Agent:
+    def agent(self):
         if self._agent is None:
-            self._agent = Agent(name=self.agent_name, system_prompt=self.system_prompt)
+            self._agent = create_agent(
+                model=self.model,
+                tools=self._tools,
+                system_prompt=self.system_prompt,
+                name=self.agent_name,
+            )
         return self._agent
 
     @property

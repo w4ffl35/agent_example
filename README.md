@@ -11,7 +11,7 @@ that can be used as a customer service bot.
 ### Install Ollama and Run Gemma3
 
 1. `curl -fsSL https://ollama.com/install.sh | sh`
-2. `ollama run gemma3`
+2. `ollama run llama3.2`
 
 ### Create Virtual Environment and Install Dependencies
 
