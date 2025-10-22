@@ -19,9 +19,6 @@ source venv/bin/activate
 python main.py
 ```
 
-You will be asked for a username and password.
-For this example you must use "admin" as username and "password" as password.
-
 ---
 
 Alternatively, manual setup instructions:
