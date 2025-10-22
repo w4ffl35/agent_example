@@ -5,7 +5,7 @@ command prompt interface. The agent runs locally using Llama3.2 via Ollama.
 
 ## Setup
 
-During setup you will be asked for a LangChain API key. If you wish to see LangSmnith traces, you will need to create an API key and have that prepared before running the setup script.
+During setup you will be asked for a LangChain API key. If you wish to see LangSmith traces, you will need to create an API key and have that prepared before running the setup script.
 
 Setup script:
 ```bash
