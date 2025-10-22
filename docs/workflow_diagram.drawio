@@ -1,0 +1,103 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Agent Workflow" id="workflow">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- START Node -->
+        <mxCell id="start" value="START" style="ellipse;whiteSpace=wrap;html=1;fillColor=#90EE90;strokeColor=#333333;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="490" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Model Node -->
+        <mxCell id="model" value="Model Node&lt;br&gt;&lt;br&gt;1. Trim messages (2000 tokens)&lt;br&gt;2. Apply system prompt&lt;br&gt;3. Call ChatOllama (llama3.2)&lt;br&gt;4. Generate response" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#87CEEB;strokeColor=#333333;fontSize=12;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="440" y="160" width="220" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- Decision Diamond -->
+        <mxCell id="decision" value="Has&lt;br&gt;tool_calls?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFD700;strokeColor=#333333;fontSize=13;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="480" y="340" width="140" height="140" as="geometry" />
+        </mxCell>
+        
+        <!-- Tools Node -->
+        <mxCell id="tools" value="Tools Node&lt;br&gt;&lt;br&gt;1. Execute retrieve_context&lt;br&gt;2. Search knowledge base&lt;br&gt;3. Return top 2 docs&lt;br&gt;4. Truncate to 500 chars each" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DDA0DD;strokeColor=#333333;fontSize=12;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="760" y="350" width="220" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- END Node -->
+        <mxCell id="end" value="END&lt;br&gt;&lt;br&gt;Return final response&lt;br&gt;Save to MemorySaver" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFB6C1;strokeColor=#333333;fontSize=13;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="470" y="560" width="160" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- State Box -->
+        <mxCell id="state" value="MessagesState&lt;br&gt;&lt;br&gt;• messages: List[BaseMessage]&lt;br&gt;• HumanMessage&lt;br&gt;• AIMessage&lt;br&gt;• ToolMessage&lt;br&gt;• SystemMessage" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5DC;strokeColor=#666666;fontSize=11;align=left;verticalAlign=top;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="160" width="240" height="140" as="geometry" />
+        </mxCell>
+        
+        <!-- Memory Box -->
+        <mxCell id="memory" value="MemorySaver&lt;br&gt;&lt;br&gt;• Checkpointer (in-memory)&lt;br&gt;• Thread ID: &quot;1&quot;&lt;br&gt;• Persists conversation&lt;br&gt;• Enables follow-ups" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6F3FF;strokeColor=#666666;fontSize=11;align=left;verticalAlign=top;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="340" width="240" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- Config Box -->
+        <mxCell id="config" value="Configuration&lt;br&gt;&lt;br&gt;• Model: ChatOllama llama3.2&lt;br&gt;• Temperature: 0.7&lt;br&gt;• Max tokens: 2000&lt;br&gt;• Trim strategy: &quot;last&quot;&lt;br&gt;• Tools: retrieve_context" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF4E6;strokeColor=#666666;fontSize=11;align=left;verticalAlign=top;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="500" width="240" height="140" as="geometry" />
+        </mxCell>
+        
+        <!-- Arrows -->
+        <!-- START to Model -->
+        <mxCell id="arrow1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;" edge="1" parent="1" source="start" target="model">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Model to Decision -->
+        <mxCell id="arrow2" value="AI Response" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;fontSize=11;" edge="1" parent="1" source="model" target="decision">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Decision to Tools (YES) -->
+        <mxCell id="arrow3" value="YES&lt;br&gt;(has tool_calls)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#00AA00;fontSize=11;fontStyle=1" edge="1" parent="1" source="decision" target="tools">
+          <mxGeometry x="-0.2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Decision to END (NO) -->
+        <mxCell id="arrow4" value="NO&lt;br&gt;(final response)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#CC0000;fontSize=11;fontStyle=1" edge="1" parent="1" source="decision" target="end">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Tools back to Model -->
+        <mxCell id="arrow5" value="ToolMessage&lt;br&gt;(context retrieved)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;fontSize=11;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="tools" target="model">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="870" y="220" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- User Input annotation -->
+        <mxCell id="input" value="User Input&lt;br&gt;HumanMessage" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=2" vertex="1" parent="1">
+          <mxGeometry x="360" y="60" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Loop annotation -->
+        <mxCell id="loop" value="Multi-step&lt;br&gt;reasoning loop" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontStyle=2;fontColor=#666666" vertex="1" parent="1">
+          <mxGeometry x="900" y="200" width="80" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Title -->
+        <mxCell id="title" value="Developer Onboarding Agent - StateGraph Workflow" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="360" y="700" width="480" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Legend -->
+        <mxCell id="legend" value="Legend:&lt;br&gt;🟢 Entry Point&lt;br&gt;🔵 Processing Node&lt;br&gt;🟡 Decision Point&lt;br&gt;🟣 Tool Execution&lt;br&gt;🔴 Exit Point" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#666666;fontSize=10;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="80" y="690" width="200" height="120" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

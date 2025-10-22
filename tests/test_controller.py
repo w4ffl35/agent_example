@@ -20,6 +20,7 @@ class TestController(BaseTestCase):
         "system_prompt",
         "model",
         "extra_files",
+        "temperature",
     ]
 
     def test_model_is_initialized(self):

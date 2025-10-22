@@ -20,6 +20,7 @@ class Controller:
         model_name: str = "llama3.2",
         base_path: str = "docs/rag",
         extra_files: Optional[List[str]] = None,
+        temperature: float = 0.7,
     ):
         # Construct paths based on agent_folder
         self.agent_folder = agent_folder
@@ -28,6 +29,7 @@ class Controller:
         self.system_prompt_path = os.path.join(self.agent_path, "system_prompt.md")
         self.knowledge_directory = os.path.join(self.agent_path, "knowledge")
         self.extra_files = extra_files or []
+        self.temperature = temperature
 
         self.tool_manager = ToolManager(
             rag_directory=self.knowledge_directory,
@@ -63,7 +65,7 @@ class Controller:
                 system_prompt=self.system_prompt,
                 tools=self.tools,
                 name=self.agent_name,
-                temperature=0.7,
+                temperature=self.temperature,
             )
         return self._agent
 
@@ -87,6 +89,6 @@ class Controller:
                 sys.stdout.write(message.content)
                 sys.stdout.flush()
         print()
-    
+
     def invoke(self, user_input: str) -> dict:
         return self.workflow_manager.invoke(user_input)
