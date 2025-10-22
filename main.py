@@ -1,5 +1,7 @@
 import argparse
 from app import App
+from dotenv import load_dotenv
+from pathlib import Path
 
 
 def main():
@@ -54,4 +56,9 @@ def main():
 
 
 if __name__ == "__main__":
+    try:
+        env_path = Path(__file__).parent / ".env"
+        load_dotenv(env_path)
+    except Exception as e:
+        print("Could not load .env file: " + str(e))
     main()

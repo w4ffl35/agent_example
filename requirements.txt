@@ -3,6 +3,8 @@ langchain-core==1.0.0
 langchain-ollama==1.0.0
 langchain-text-splitters==1.0.0
 langgraph==1.0.0
+langsmith>=0.1.0
+python-dotenv>=1.0.0
 markdownify
 requests
 numpy

@@ -1,3 +1,7 @@
 *.pyc
 .vscode
 .idea
+.env
+.env.local
+.env.*.local
+venv
