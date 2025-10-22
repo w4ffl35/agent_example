@@ -1,6 +1,7 @@
 from typing import List, Optional, Callable
 from langchain.tools import tool
 from rag_manager import RAGManager
+import json
 
 
 class ToolManager:
@@ -17,6 +18,7 @@ class ToolManager:
         self.provider_name = provider_name
         self.model_name = model_name
         self.extra_files = extra_files or []
+        self.employee_db = "data/employee_db.json"
 
     @property
     def rag_manager(self) -> RAGManager:
@@ -78,17 +80,50 @@ class ToolManager:
             Returns:
                 A string with the employee's role and department, or a message if not found.
             """
-            # For demonstration, using a static dictionary. In real use, this could query a database.
-            employee_directory = {
-                "Joe Curlee": "Software Engineer, Development Team",
-                "Carol Lee": "Product Manager, Mobile Apps",
-                "Bob Smith": "UX Designer, Web Team",
-            }
-
-            info = employee_directory.get(employee_name)
-            if info:
-                return f"{employee_name} is a {info}."
-            else:
-                return f"No information found for employee: {employee_name}."
+            with open(self.employee_db, "r") as f:
+                employee_directory = json.load(f)
+                info = employee_directory.get(employee_name)
+                if info:
+                    return f"{employee_name} is a {info}."
+            return f"No information found for employee: {employee_name}."
 
         return employee_lookup
+
+    def create_employee_profile_tool(self) -> Callable:
+        @tool
+        def create_employee_profile(
+            username: str, employee_name: str, role: str, department: str
+        ) -> str:
+            """Create a new employee profile in the directory.
+
+            Args:
+                username: The username of the new employee.
+                employee_name: The full name of the employee.
+                role: The role/title of the employee.
+                department: The department the employee belongs to.
+
+            Returns:
+                A confirmation message.
+            """
+            # Read existing database
+            try:
+                with open(self.employee_db, "r") as f:
+                    content = f.read().strip()
+                    employee_db = json.loads(content) if content else {}
+            except FileNotFoundError:
+                employee_db = {}
+
+            # Add new employee
+            employee_db[employee_name] = {
+                "username": username,
+                "role": role,
+                "department": department,
+            }
+
+            # Write back to file
+            with open(self.employee_db, "w") as f:
+                json.dump(employee_db, f, indent=4)
+
+            return f"✓ Created profile for {username}: {employee_name}, Role: {role}, Department: {department}."
+
+        return create_employee_profile

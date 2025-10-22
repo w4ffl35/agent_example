@@ -59,7 +59,11 @@ class App:
         self.controller.stream(user_input)
 
     def _run_app(self):
-        self.controller.stream("Send a friendly greeting to start the conversation.")
+        # Trigger initial workflow (will run login/onboarding nodes)
+        # Use a special startup message that won't be seen by the user
+        self.controller.stream("__startup__")
+
+        # Now start the main conversation loop
         while self.is_running:
             user_input = self.get_user_input()
             self._handle_request(user_input)

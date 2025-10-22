@@ -1,12 +1,30 @@
 # LangChain Agent Example
 
 This is a simple agent that uses LangChain and LangGraph to load an agent with RAG capabilities and a
-command prompt interface. The agent runs locally using the Gemma3 model via Ollama.
-
-The point of this demo is to show a minimal example of how to set up an agent with LangChain 
-that can be used as a customer service bot.
+command prompt interface. The agent runs locally using Llama3.2 via Ollama.
 
 ## Setup
+
+During setup you will be asked for a LangChain API key. If you wish to see LangSmnith traces, you will need to create an API key and have that prepared before running the setup script.
+
+Setup script:
+```bash
+./bin/setup.sh
+```
+
+## Run the application
+
+```bash
+source venv/bin/activate
+python main.py
+```
+
+You will be asked for a username and password.
+For this example you must use "admin" as username and "password" as password.
+
+---
+
+Alternatively, manual setup instructions:
 
 ### Install Ollama and Run Llama3.2
 
@@ -35,5 +53,5 @@ python -m unittest discover -v tests
 
 Eval tests
 ```bash
-python -m unittest discover -v eval_tests
+python -m pytest eval_tests/test_dev_onboarding_agent.py -v
 ```
