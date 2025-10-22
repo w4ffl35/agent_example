@@ -1,3 +1,4 @@
+import os
 from typing import List, Optional, Callable
 from langchain.tools import tool
 from rag_manager import RAGManager
@@ -80,11 +81,14 @@ class ToolManager:
             Returns:
                 A string with the employee's role and department, or a message if not found.
             """
-            with open(self.employee_db, "r") as f:
-                employee_directory = json.load(f)
-                info = employee_directory.get(employee_name)
-                if info:
-                    return f"{employee_name} is a {info}."
+            try:
+                with open(self.employee_db, "r") as f:
+                    employee_directory = json.load(f)
+                    info = employee_directory.get(employee_name)
+                    if info:
+                        return f"{employee_name} is a {info}."
+            except FileNotFoundError:
+                pass
             return f"No information found for employee: {employee_name}."
 
         return employee_lookup
@@ -105,6 +109,8 @@ class ToolManager:
             Returns:
                 A confirmation message.
             """
+            os.makedirs(os.path.dirname(self.employee_db), exist_ok=True)
+
             # Read existing database
             try:
                 with open(self.employee_db, "r") as f:

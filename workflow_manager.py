@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import json
+import os
 from typing import Any, List, Optional, Tuple
 from langgraph.graph.state import CompiledStateGraph
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -118,11 +119,9 @@ class WorkflowManager:
 
     def _define_nodes(self):
         self.workflow.add_node("model", self._call_model)
-
-        if self.agent_has_tools:
-            self.workflow.add_node("tools", self.tool_node)
-            self.workflow.add_node("login", self._login)
-            self.workflow.add_node("onboarding", self._onboarding)
+        self.workflow.add_node("login", self._login)
+        self.workflow.add_node("onboarding", self._onboarding)
+        self.workflow.add_node("tools", self.tool_node)
 
     def _add_edges(self):
         self.workflow.add_edge(START, "login")
@@ -137,30 +136,25 @@ class WorkflowManager:
             },
         )
 
-        # After onboarding, check if tools need to be called
-        if self.agent_has_tools:
-            self.workflow.add_conditional_edges(
-                "onboarding",
-                self._agent_router,
-                {
-                    "tools": "tools",
-                    "end": "model",  # If no tools, go to model for greeting
-                },
-            )
+        self.workflow.add_conditional_edges(
+            "onboarding",
+            self._agent_router,
+            {
+                "tools": "tools",
+                "end": "model",
+            },
+        )
 
-            self.workflow.add_conditional_edges(
-                "model",
-                self._agent_router,
-                {
-                    "tools": "tools",
-                    "end": END,
-                },
-            )
-            # After tools execute, go back to model to process the result
-            self.workflow.add_edge("tools", "model")
-        else:
-            self.workflow.add_edge("onboarding", "model")
-            self.workflow.add_edge("model", END)
+        self.workflow.add_conditional_edges(
+            "model",
+            self._agent_router,
+            {
+                "tools": "tools",
+                "end": END,
+            },
+        )
+
+        self.workflow.add_edge("tools", "model")
 
     def _call_model(self, state: MessagesState):
         trimmed_messages = self.trimmer.invoke(state["messages"])
@@ -171,30 +165,39 @@ class WorkflowManager:
         return {"messages": [response]}
 
     def _login(self, state: MessagesState):
-        username = input("Enter username: ")
-        password = input("Enter password: ")
-        # Simulate login validation
-        if username == "admin" and password == "password":
-            self._is_logged_in = True
-            with open("data/employee_db.json", "r") as f:
-                try:
-                    employee_db = json.load(f)
-                except json.JSONDecodeError:
-                    employee_db = {}
-                for _name, data in employee_db.items():
-                    if data.get("username") == username:
-                        self._user = User(
-                            username=username,
-                            name=_name,
-                            role=data.get("role"),
-                            department=data.get("department"),
-                        )
-                        self._is_new_user = False
-                        break
-            if self._is_logged_in:
-                print("Login successful!")
-        else:
-            print("Login failed. Please try again.")
+        if not self._is_logged_in:
+            username = input("Enter username: ")
+            password = input("Enter password: ")
+            # Simulate login validation
+            if username == "admin" and password == "password":
+                self._is_logged_in = True
+                file_name = "data/employee_db.json"
+                os.makedirs("data", exist_ok=True)
+                if not os.path.exists(file_name):
+                    with open(file_name, "w") as f:
+                        json.dump({}, f)
+
+                with open(file_name, "r") as f:
+                    try:
+                        employee_db = json.load(f)
+                    except json.JSONDecodeError:
+                        employee_db = {}
+                    for _name, data in employee_db.items():
+                        if data.get("username") == username:
+                            self._user = User(
+                                username=username,
+                                name=_name,
+                                role=data.get("role"),
+                                department=data.get("department"),
+                            )
+                            self._is_new_user = False
+                            break
+                if self._is_logged_in:
+                    print("Login successful!")
+            else:
+                print("Login failed. Please try again.")
+
+        return state
 
     def _onboarding(self, state: MessagesState):
         print("Welcome to the system! Let's get you onboarded.")
