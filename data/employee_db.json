@@ -1,0 +1,52 @@
+{
+    "Alice Johnson": {
+        "username": "ajohnson",
+        "role": "Senior Software Engineer",
+        "department": "Engineering"
+    },
+    "Bob Smith": {
+        "username": "bsmith",
+        "role": "Product Manager",
+        "department": "Product"
+    },
+    "Carol Williams": {
+        "username": "cwilliams",
+        "role": "DevOps Engineer",
+        "department": "Engineering"
+    },
+    "David Brown": {
+        "username": "dbrown",
+        "role": "Frontend Developer",
+        "department": "Engineering"
+    },
+    "Emma Davis": {
+        "username": "edavis",
+        "role": "QA Engineer",
+        "department": "Engineering"
+    },
+    "Frank Miller": {
+        "username": "fmiller",
+        "role": "Engineering Manager",
+        "department": "Engineering"
+    },
+    "Grace Lee": {
+        "username": "glee",
+        "role": "UX Designer",
+        "department": "Design"
+    },
+    "Henry Wilson": {
+        "username": "hwilson",
+        "role": "Backend Developer",
+        "department": "Engineering"
+    },
+    "Iris Martinez": {
+        "username": "imartinez",
+        "role": "Data Engineer",
+        "department": "Data"
+    },
+    "Jack Taylor": {
+        "username": "jtaylor",
+        "role": "Security Engineer",
+        "department": "Security"
+    }
+}

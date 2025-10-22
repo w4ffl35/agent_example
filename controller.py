@@ -89,18 +89,10 @@ class Controller:
             return f.read()
 
     def stream(self, user_input: str):
-        # Only print agent name prefix after login/onboarding is complete
         has_output = False
-        cleared_screen = False
         for message in self.workflow_manager.stream(user_input):
             if isinstance(message, AIMessage) and message.content:
                 if not has_output:
-                    # Clear terminal before showing bot's first message (after onboarding)
-                    if not cleared_screen and self.workflow_manager._user is not None:
-                        import os
-
-                        os.system("clear" if os.name != "nt" else "cls")
-                        cleared_screen = True
                     print(f"{self.agent_name}: ", end="", flush=True)
                     has_output = True
                 sys.stdout.write(message.content)
