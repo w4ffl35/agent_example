@@ -27,6 +27,10 @@ class WorkflowManager:
         self._define_nodes()
 
     @property
+    def agent_has_tools(self) -> bool:
+        return self._agent.tools is not None and len(self._agent.tools) > 0
+
+    @property
     def tool_node(self) -> ToolNode:
         if self._tool_node is None:
             self._tool_node = ToolNode(self._agent.tools)
@@ -94,11 +98,18 @@ class WorkflowManager:
 
     def _define_nodes(self):
         self.workflow.add_node("model", self._call_model)
-        self.workflow.add_node("tools", self.tool_node)
+        if self.agent_has_tools:
+            self.workflow.add_node("tools", self.tool_node)
+
         self.workflow.add_edge(START, "model")
-        self.workflow.add_conditional_edges(
-            "model", self._should_continue, {"tools": "tools", "end": END}
-        )
+
+        if self.agent_has_tools:
+            self.workflow.add_conditional_edges(
+                "model", self._should_continue, {"tools": "tools", "end": END}
+            )
+        else:
+            self.workflow.add_edge("model", "end")
+
         self.workflow.add_edge("tools", "model")
 
     def _call_model(self, state: MessagesState):

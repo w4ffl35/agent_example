@@ -20,6 +20,7 @@ class TestWorkflowManager(BaseTestCase):
         "prompt_template",
         "config",
         "tool_node",
+        "agent_has_tools",
     ]
 
     def __init__(self, *args, **kwargs):
