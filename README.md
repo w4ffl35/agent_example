@@ -28,6 +28,12 @@ To quit, type `quit` and press Enter.
 
 ## Run tests
 
+Unit tests
 ```bash
-python -m unittest discover -s tests
+python -m unittest discover -v tests
+```
+
+Eval tests
+```bash
+python -m unittest discover -v eval_tests
 ```
