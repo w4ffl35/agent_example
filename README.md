@@ -8,7 +8,7 @@ that can be used as a customer service bot.
 
 ## Setup
 
-### Install Ollama and Run Gemma3
+### Install Ollama and Run Llama3.2
 
 1. `curl -fsSL https://ollama.com/install.sh | sh`
 2. `ollama run llama3.2`
