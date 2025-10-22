@@ -49,7 +49,12 @@ class Controller:
         Defaults to RAG tool
         """
         return (
-            self._tools if self._tools else [self.tool_manager.retrieve_context_tool()]
+            self._tools
+            if self._tools
+            else [
+                self.tool_manager.retrieve_context_tool(),
+                self.tool_manager.employee_lookup_tool(),
+            ]
         )
 
     @property

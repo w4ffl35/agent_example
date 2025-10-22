@@ -6,7 +6,13 @@ from rag_manager import RAGManager
 class ToolManager:
     _rag_manager: Optional[RAGManager] = None
 
-    def __init__(self, rag_directory: str, provider_name: str, model_name: str, extra_files: Optional[List[str]] = None):
+    def __init__(
+        self,
+        rag_directory: str,
+        provider_name: str,
+        model_name: str,
+        extra_files: Optional[List[str]] = None,
+    ):
         self.rag_directory = rag_directory
         self.provider_name = provider_name
         self.model_name = model_name
@@ -61,4 +67,28 @@ class ToolManager:
 
         return retrieve_context
 
-        return retrieve_context
+    def employee_lookup_tool(self) -> Callable:
+        @tool
+        def employee_lookup(employee_name: str) -> str:
+            """Lookup basic information about an employee.
+
+            Args:
+                employee_name: The full name of the employee to look up.
+
+            Returns:
+                A string with the employee's role and department, or a message if not found.
+            """
+            # For demonstration, using a static dictionary. In real use, this could query a database.
+            employee_directory = {
+                "Joe Curlee": "Software Engineer, Development Team",
+                "Carol Lee": "Product Manager, Mobile Apps",
+                "Bob Smith": "UX Designer, Web Team",
+            }
+
+            info = employee_directory.get(employee_name)
+            if info:
+                return f"{employee_name} is a {info}."
+            else:
+                return f"No information found for employee: {employee_name}."
+
+        return employee_lookup
