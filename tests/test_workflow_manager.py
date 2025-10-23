@@ -7,6 +7,11 @@ from tests.base_test_case import BaseTestCase
 from workflow_manager import WorkflowManager
 
 
+class MockModel:
+    def bind_tools(self, tools, **kwargs):
+        return self
+
+
 class TestWorkflowManager(BaseTestCase):
     public_methods = [
         "invoke",
@@ -14,6 +19,12 @@ class TestWorkflowManager(BaseTestCase):
         "clear_memory",
     ]
     public_properties = []
+    _setup_kwargs = {
+        "system_prompt": "You are a helpful AI assistant.",
+        "model": MockModel(),
+        "tools": [],
+        "max_tokens": 2000,
+    }
 
     def __init__(self, *args, **kwargs):
         self.target_class = WorkflowManager

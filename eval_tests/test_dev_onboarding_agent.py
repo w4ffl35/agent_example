@@ -3,37 +3,9 @@ from dotenv import load_dotenv
 from openevals.llm import create_llm_as_judge
 from openevals.prompts import CORRECTNESS_PROMPT, CONCISENESS_PROMPT
 from controller import Controller
-from workflow_manager import WorkflowManager, User
 from langsmith import testing as t
 
 load_dotenv()
-
-
-class EvalWorkflowManager(WorkflowManager):
-    def __init__(self, *args, **kwargs):
-        self._is_logged_in = True
-        self._is_new_user = False
-        self._user = User(
-            username="test_user",
-            name="Test User",
-            role="Developer",
-            department="Engineering",
-        )
-        super().__init__(*args, **kwargs)
-
-    def _login(self, state):
-        return state
-
-    def _login_router(self, state):
-        return "model"
-
-
-class EvalController(Controller):
-    @property
-    def workflow_manager(self):
-        if self._workflow_manager is None:
-            self._workflow_manager = EvalWorkflowManager(agent=self.agent)
-        return self._workflow_manager
 
 
 correctness_evaluator = create_llm_as_judge(
@@ -72,7 +44,7 @@ def run_test_case(test_case: dict):
     inputs = test_case["prompt"]
     reference_outputs = test_case["reference_output"]
 
-    controller = EvalController(agent_folder="dev_onboarding")
+    controller = Controller(agent_folder="dev_onboarding")
     result = controller.workflow_manager.invoke(inputs)
     outputs = result["messages"][-1].content
 

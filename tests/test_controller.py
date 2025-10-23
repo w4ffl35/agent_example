@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch, MagicMock
 from langchain_core.messages import AIMessage
 
 from tests.base_test_case import BaseTestCase
@@ -10,7 +11,6 @@ class TestController(BaseTestCase):
     _setup_args = []  # Controller uses default agent_folder
     public_methods = ["stream", "invoke"]
     public_properties = [
-        "agent",
         "agent_name",
         "agent_folder",
         "base_path",
@@ -27,27 +27,24 @@ class TestController(BaseTestCase):
         model = self.obj.model
         self.assertIsNotNone(model)
 
-    def test_agent_is_initialized(self):
-        # Mock the model to avoid actually initializing Ollama
-        class MockModel:
-            def bind_tools(self, tools, **kwargs):
-                return self
-
-        class MockAgent:
-            def invoke(self, state):
-                return {"messages": [AIMessage(content="Mock response")]}
-
-        self.obj._model = MockModel()
-        self.obj._agent = MockAgent()
-
-        agent = self.obj.agent
-        self.assertIsNotNone(agent)
-
     def test_agent_name_property(self):
         """Test that agent_name property works correctly."""
         controller = Controller()
         controller.agent_name = "TestBot"
         self.assertEqual(controller.agent_name, "TestBot")
+
+    def test_invoke_returns_message(self):
+        result = self.obj.model.invoke("Hello, world!")
+        self.assertIsNotNone(result)
+
+    def test_invoke_method_calls_invoke_on_model(self):
+        # Test that the model returns an AIMessage when invoked
+        response = self.obj.model.invoke("Hello, world!")
+        self.assertIsInstance(response, AIMessage)
+        # Verify the response has content (actual content will vary)
+        self.assertIsNotNone(response.content)
+        self.assertIsInstance(response.content, str)
+        self.assertGreater(len(response.content), 0)
 
 
 if __name__ == "__main__":

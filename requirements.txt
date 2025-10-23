@@ -9,3 +9,5 @@ markdownify
 requests
 numpy
 pytest
+langchain-openai
+openevals

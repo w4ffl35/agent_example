@@ -2,14 +2,14 @@ import os
 import sys
 from typing import List, Optional, Callable
 from langchain_core.messages import AIMessage
+from langchain_ollama import ChatOllama
 from tool_manager import ToolManager
-from agent import Agent
 from workflow_manager import WorkflowManager
 
 
 class Controller:
-    _agent = None
     _workflow_manager = None
+    _model = None
 
     def __init__(
         self,
@@ -59,26 +59,24 @@ class Controller:
         )
 
     @property
-    def model(self):
-        """Access the underlying model from the agent."""
-        return self.agent.model
-
-    @property
-    def agent(self):
-        if self._agent is None:
-            self._agent = Agent(
-                model_name=self._model_name,
-                system_prompt=self.system_prompt,
-                tools=self.tools,
-                name=self.agent_name,
-                temperature=self.temperature,
+    def model(self) -> ChatOllama:
+        if self._model is None:
+            base_model = ChatOllama(
+                model=self._model_name, temperature=self.temperature
             )
-        return self._agent
+            # Bind tools if provided
+            if self._tools:
+                self._model = base_model.bind_tools(self._tools)
+            else:
+                self._model = base_model
+        return self._model
 
     @property
     def workflow_manager(self):
         if self._workflow_manager is None:
-            self._workflow_manager = WorkflowManager(agent=self.agent)
+            self._workflow_manager = WorkflowManager(
+                system_prompt=self.system_prompt, model=self.model, tools=self.tools
+            )
         return self._workflow_manager
 
     @property

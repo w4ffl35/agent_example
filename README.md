@@ -19,6 +19,7 @@ source venv/bin/activate
 python main.py
 ```
 
+The agent will introduce itself and you can start asking questions about developer onboarding.
 ---
 
 Alternatively, manual setup instructions:

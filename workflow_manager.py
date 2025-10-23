@@ -1,14 +1,13 @@
-from typing import Any, Annotated, Optional
+from typing import Any, Annotated, Optional, List
 from typing_extensions import TypedDict
 
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import HumanMessage, AIMessage, BaseMessage, trim_messages
 from langchain_core.messages.utils import count_tokens_approximately
+from langchain_ollama import ChatOllama
 from langgraph.graph import START, END, StateGraph, add_messages
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import ToolNode
-
-from agent import Agent
 
 
 class WorkflowState(TypedDict):
@@ -22,8 +21,16 @@ class WorkflowManager:
     Manages the LangGraph workflow for agent execution.
     """
 
-    def __init__(self, agent: Optional[Agent] = None, max_tokens: int = 2000):
-        self._agent = agent or Agent()
+    def __init__(
+        self,
+        system_prompt: str,
+        model: Optional[ChatOllama],
+        tools: Optional[List[callable]],
+        max_tokens: int = 2000,
+    ):
+        self._system_prompt = system_prompt
+        self._model = model
+        self._tools = tools
         self._max_tokens = max_tokens
         self._token_counter = lambda msgs: count_tokens_approximately(msgs)
         self._memory = MemorySaver()
@@ -39,13 +46,13 @@ class WorkflowManager:
 
         # Add nodes
         workflow.add_node("model", self._call_model)
-        if self._agent.tools:
-            workflow.add_node("tools", ToolNode(self._agent.tools))
+        if self._tools:
+            workflow.add_node("tools", ToolNode(self._tools))
 
         # Add edges
         workflow.add_edge(START, "model")
 
-        if self._agent.tools:
+        if self._tools:
             workflow.add_conditional_edges(
                 "model",
                 self._route_after_model,
@@ -83,13 +90,13 @@ class WorkflowManager:
         # Build prompt with system message and conversation history
         prompt = ChatPromptTemplate.from_messages(
             [
-                ("system", self._agent.system_prompt),
+                ("system", self._system_prompt),
                 MessagesPlaceholder(variable_name="messages"),
             ]
         )
 
         formatted_prompt = prompt.invoke({"messages": trimmed_messages})
-        response = self._agent.invoke(formatted_prompt)
+        response = self._model.invoke(formatted_prompt)
 
         return {"messages": [response]}
 
