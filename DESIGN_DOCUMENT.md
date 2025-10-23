@@ -81,7 +81,7 @@ Our RAGManager class is responsible for loading documents, creating embeddings, 
 - **Documents:** 13 markdown files covering setup, testing, deployment, security, etc.
 - **Chunking:** RecursiveCharacterTextSplitter (1000 char chunks, 200 char overlap)
 - **Embeddings:** OllamaEmbeddings for local, privacy-preserving embeddings
-- **Retrieval:** k=2 documents, truncated to 500 chars per document
+- **Retrieval:** 2 documents, truncated to 500 chars per document
 - **Optimization Rationale:** Balanced between context richness and staying under the 2000 token model limit
 
 

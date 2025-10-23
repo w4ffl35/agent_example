@@ -54,7 +54,7 @@ class ToolManager:
 
             # Format results for the agent to use - keep it concise
             context_parts = []
-            for i, doc in enumerate(retrieved_docs, 1):
+            for i, doc in enumerate(retrieved_docs):
                 source = doc.metadata.get("source", "unknown")
                 # Extract just the filename for cleaner output
                 filename = source.split("/")[-1] if "/" in source else source
